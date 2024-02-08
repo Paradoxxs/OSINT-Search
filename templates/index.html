@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block container %}
+<div class="container bg mt-5">
+  <hr>
+  <h1>OSINT Search</h1>
+  <hr>
+  <label for="tool-selector">Select data type:</label>
+  <select name="datatype" id="datatype" method="GET" action="/">
+    {% for type in datatype %}
+        <option value="{{type}}" SELECTED>{{type}}</option>"
+    {% endfor %}
+</select>
+  <p></p>
+  <div class="input-group rounded">
+    <input type="search" class="form-control rounded margin-right-sm" placeholder="Indtast data her..."
+      aria-label="Search" aria-describedby="search-addon" id="input" />
+    <button class="border-0 input-group-text ml-1" id="search-addon" type="submit">
+      Search
+    </button>
+  </div>  
+
+
+  <!-- loading spinner - hidden by default -->
+  <div id="spinner" class="text-center mt-5 d-none">
+    <div class="spinner-border text-secondary" role="status" style="width: 5rem;height: 5rem;"></div>
+  </div>
+
+  <div class="d-grid gap-2">
+    <button id="download" type="button" class="btn btn-light mt-2 d-none">Download JSON</button>
+  </div>
+  <p></p>
+
+  <!-- HITS GO HERE BY AJAX -->
+  <div id="hits">
+  </div>
+  </div>
+
+  <hr>
+  </p>
+  <p class="lead">
+    Platform that standardize the process of performing OSINT searches.
+  </p>
+  <hr>
+  <p class="lead"><strong>Current supported platform</strong></p>
+  <table class="table table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>name</th>
+        <th>Source</th>
+        <th>creator</th>
+      </tr>
+    </thead>
+    <tbody id="platforms">
+    </tbody>
+  </table>
+  <p>
+    <hr>
+  </p>
+  <p class="lead">Any missing features can request as feature on the github page.</a>.
+  </p>
+</div>
+<div id="tools-data" style="display:none">{{ platforms }}
+</div>
+
+
+
+<script>
+  let toolsData = document.getElementById("tools-data").textContent
+  window.__data = JSON.parse(toolsData);
+  var target = document.getElementById("platforms");
+
+  for (let platform of window.__data) {
+    let row = document.createElement("tr")
+    let cols = `
+      <td>${platform.label}</td>
+      <td>${platform.type}</td>
+      <td>${platform.dev}</td>
+      `
+
+    row.insertAdjacentHTML('beforeend', cols);
+    target.appendChild(row)
+  }
+
+  // Press the search button
+  btn = document.getElementById("search-addon");
+  btn.addEventListener("click", function (e) {
+    doSearch();
+  })
+  
+  // press enter inside the search field
+  let inputField = document.getElementById("input");
+  // Execute a function when the user presses a key on the keyboard
+  inputField.addEventListener("keypress", function (event) {
+    // If the user presses the "Enter" key on the keyboard
+    if (event.key === "Enter") {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      // Trigger the button element with a click
+      doSearch();
+    }
+  });
+
+
+  const doSearch = async function () {
+    // register download button
+    let download = document.getElementById("download");
+
+    // clear hitsContainer
+    let hitsContainer = document.getElementById("hits");
+    hitsContainer.innerHTML = "";
+
+    // Set loading spinner
+    let spinnerElement = document.getElementById("spinner");
+    spinnerElement.classList.remove("d-none");
+
+    // get data from form
+    let data = document.getElementById("input").value;
+    window.__selector = data;
+    var selectedtype = document.getElementById("datatype").value;
+    selectedtype;
+    // query api route with email as param
+    data = await fetch(`/api?data=${data}&type=${selectedtype}`);
+    html = await data.text();
+
+    // remove spinner
+    spinnerElement.classList.add("d-none");
+
+    // show download button
+    download.classList.remove("d-none");
+
+    // output results into hitsContainer
+    hitsContainer.innerHTML = html;
+  }
+
+    // enable download of JSON-data
+    let download = document.getElementById("download");
+    download.addEventListener("click", function (e) {
+    let json_str = document.querySelector("#data").textContent;
+    let json = JSON.stringify(JSON.parse(json_str), null, 4);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    let node = document.createElement("a");
+    node.href = url;
+    node.download = `${window.__pluginName}_${window.__selector}.json`;
+    node.click();
+    node.remove();
+  })
+
+</script>
+
+{% endblock %}

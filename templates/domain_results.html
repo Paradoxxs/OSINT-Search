@@ -1,0 +1,57 @@
+{% if hits %}
+<table class="table mt-2">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Domain</th>
+      <th scope="col">IP</th>
+      <th scope="col">Registrar</th>
+      <th scope="col">Creation Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <td>{{ hits.results.domain }}</td>
+    <td>{{ hits.results.dns.a[0] }}</td>
+    <td>{{ hits.results.registrar }}</td>
+    <td>{{ hits.results.creation_date[0] }}</td>
+  </tbody>
+</table>
+
+<table class="table mt-2">
+  <p>Favicon search:</p>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Domain</th>
+      <th scope="col">IP</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for shodan in hits.shodan %}
+    <td>{{ shodan.domains }}</td>
+    <td>{{ shodan.ip_str}}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<table class="table mt-2">
+  <p>Historical DNS last 25:</p>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">IP</th>
+      <th scope="col">First seen</th>
+      <th scope="col">Last seen</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for dns in hits.dns_hists %}
+    <td>{{ dns.answer}}</td>
+    <td>{{ dns.lastSeenTimestamp_utc }}</td>
+    <td>{{ dns.createdTimestamp_utc }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script id="data" type="application/json">{{ hits.json_str | safe }}</script>
+{% endif %}
+

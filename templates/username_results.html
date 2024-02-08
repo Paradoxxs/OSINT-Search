@@ -1,0 +1,20 @@
+{% if hits%}
+<table class="table mt-2">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">source</th>
+      <th scope="col">Domain</th>
+      <th scope="col">url</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for hit in hits.results %}
+      <td>{{ hit.source }}</td>
+      <td>{{ hit.domain }}</td>
+      <td>{{ hit.url }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script id="data" type="application/json">{{ hits.json_str | safe }}</script>
+{% endif %}

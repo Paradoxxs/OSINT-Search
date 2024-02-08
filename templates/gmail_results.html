@@ -1,0 +1,40 @@
+{% if hits %}
+<table class="table mt-2">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Google ID</th>
+            <th scope="col">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ hits.google.google_id }}</td>
+            <td>{{ hits.google.name }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="table mt-2">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Domain</th>
+            <th scope="col">Exists</th>
+        </tr>
+    </thead>
+    <tbody>
+      {% for hit in hits.accounts %}
+      {% if hit.exists %}
+      <tr class="table-success">
+        {% else %}
+      <tr class="table-danger">
+        {% endif %}
+        <td>{{ hit.source }}</td>
+        <td>{{ hit.domain }}</td>
+        <td>{{ hit.exists }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+<script id="data" type="application/json">{{ hits.json_str | safe }}</script>
+{% endif %}
