@@ -38,7 +38,7 @@ class UserAgent:
     user_agent: str = field(init=False)
 
     def __post_init__(self):
-        self.user_agent = self.get_agent(self.device)
+        self.user_agent = self.get_agent()
 
     def get_agent(self) -> str:
         url = "https://jnrbsn.github.io/user-agents/user-agents.json"

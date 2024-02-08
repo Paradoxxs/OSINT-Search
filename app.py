@@ -12,7 +12,7 @@ from utils.get_infastructure import get_wayback, get_mnemonic ,get_whois, get_sh
 from utils.helpers import get_env_var, UserAgent
 
 
-USER_AGENT = UserAgent.user_agent
+USER_AGENT = UserAgent().user_agent
 requests.utils.default_user_agent = lambda: USER_AGENT
 
 
