@@ -8,15 +8,12 @@ from datetime import datetime
 import asyncio
 from utils.get_emails import get_holehe, get_poastal, get_ghunt
 from utils.get_usernames import get_sherlock, get_Wmn
-from utils.get_infastructure import get_wayback, get_mnemonic ,get_whois, get_shodan_favicon_search, get_shodan_IP_services
+from utils.get_infastructure import get_mnemonic ,get_whois, get_shodan_favicon_search, get_shodan_IP_services, get_wayback_count
 from utils.helpers import get_env_var, UserAgent
 
 
 USER_AGENT = UserAgent().user_agent
 requests.utils.default_user_agent = lambda: USER_AGENT
-
-
-hostIO_api = get_env_var("hostIO_api")
 Methods = ["email","username","IP","Domain"]
 
 
@@ -45,6 +42,7 @@ SUPPORTED_PLATFORMS = [
     { "label": "Mnemonic History", "description": "DNS-lookup", "type":"Domain","dev":"passivedns.mnemonic.no"},
     { "label": "Whois Lookup", "description": "DNS-lookup", "type":"Domain","dev":"github.com/richardpenman/whois"},
     { "label": "ipinfo", "description": "IP lookup", "type":"IP","dev":"ipinfo.io"},
+    { "label": "Wayback macine", "description": "Webpage archive", "type":"Domain","dev":"archive.org"},
 ]
 SUPPORTED_PLATFORMS.sort(key=lambda x: x["type"].lower())
 
@@ -158,21 +156,16 @@ def api():
             WHOIS_hits = get_whois(data)
 
             #host.io
-            hostIO = requests.request("GET", f"https://host.io/api/full/{data}?token={hostIO_api}")
-            result = {
-            "hostIO": hostIO.json(),
-            "Whois": WHOIS_hits
-            }
-            
+            hostIO = requests.request("GET", f"https://host.io/api/full/{data}?token={get_env_var('hostIO_api')}")
+            print(hostIO.json())
             result = {**hostIO.json(), **WHOIS_hits}
             # Serialize the result dictionary with the custom encoder
             json_result = json.dumps(result, default=convert_datetime)
-            
             shodan_data = get_shodan_favicon_search(data)
-            print(shodan_data)
             hist_dns_data = get_mnemonic(data)
+            wayback_data = get_wayback_count(data)
             
-            return render_template("domain_results.html", hits=dict(results=result, json_str=json_result,shodan=shodan_data,dns_hists=hist_dns_data))
+            return render_template("domain_results.html", hits=dict(results=result, json_str=json_result,shodan=shodan_data,dns_hists=hist_dns_data, wayback=wayback_data))
 
 
 

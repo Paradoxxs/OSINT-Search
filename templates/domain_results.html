@@ -52,6 +52,24 @@
   </tbody>
 </table>
 
+<table class="table mt-2">
+  <p>Wayback machine:</p>
+  <a href="https://web.archive.org/web/*/{{hits.wayback.Domain}}">https://web.archive.org/web/*/{{hits.wayback.Domain}}</a>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">First capture</th>
+      <th scope="col">Lastest capture</th>
+      <th scope="col">Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <td>{{ hits.wayback.First}}</td>
+    <td>{{ hits.wayback.Last}}</td>
+    <td>{{ hits.wayback.Total}}</td>
+    </tr>
+  </tbody>
+</table>
+
 <script id="data" type="application/json">{{ hits.json_str | safe }}</script>
 {% endif %}
 
