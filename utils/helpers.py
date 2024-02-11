@@ -6,12 +6,20 @@ import random
 import os
 from dotenv import load_dotenv, find_dotenv
 import requests
-
+from datetime import datetime
 
 load_dotenv(find_dotenv())
 
 def get_env_var(env):
     return os.getenv(env)
+
+def convert_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return obj
+
+def public_emails():
+    return ["gmail.com","hotmail.com","yahoo.com","aol.com","msn.com","live.com"]
 
 @dataclass
 class QueryResponse:
@@ -21,15 +29,6 @@ class QueryResponse:
     exists: Union[bool, None] = None
     metadata: Union[Dict[Any, Any], None] = None
     url: Union[str, None] = None
-
-
-
-def get_useragent():
-
-    url = "https://jnrbsn.github.io/user-agents/user-agents.json"
-    response = requests.get(url)
-    user_agents = response.json()
-    return random.choice(user_agents)
 
 
 @dataclass

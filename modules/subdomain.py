@@ -220,3 +220,7 @@ class chaos():
         if response.status_code is 200:
             result = self.parse_results(response,domain)
             return result
+        
+
+
+        
