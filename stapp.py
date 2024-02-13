@@ -23,7 +23,7 @@ data = st.text_input("Enter you search query")
 if st.button("Search"):
         if type == "email":
 
-            output = Email.search(data)
+            output = Email().search(data)
 
             st.dataframe(output)
             
@@ -31,12 +31,12 @@ if st.button("Search"):
     
         
         elif type == "username":
-            output = Username.search(data)
+            output = Username().search(data)
             st.dataframe(output)
             #return render_template("username_results.html", hits=dict(results=hits, json_str=json.dumps(hits)))
 
         elif type == "IP":
-            geo2ip,ipinfo,shodan_data = IPaddress.search(data)
+            geo2ip,ipinfo,shodan_data = IPaddress().search(data)
             st.json(geo2ip)
             st.json(ipinfo.json())
             st.json(shodan_data)
@@ -44,7 +44,7 @@ if st.button("Search"):
         
         elif type == "Domain":
 
-            output =  Domain.search(data)
+            output =  Domain().search(data)
             for v in output:
                  st.json(v)
             #return render_template("domain_results.html", hits=dict(results=Domain_data["result"], json_str=Domain_data["JSON"],shodan=Domain_data["Shodan"],dns_hists=Domain_data["HistoricalDNS"],wayback=Domain_data["Wayback"]))
