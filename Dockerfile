@@ -13,5 +13,7 @@ RUN python3 -m pip install Cython
 RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install ghunt
 RUN python3 -m pip install shodan
+RUN python3 -m pip install streamlit
 volume /creds
-CMD ["python3","-u", "app.py"]
+#CMD ["python3","-u", "app.py"]
+CMD ["streamlit","run", "stapp.py"]

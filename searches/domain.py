@@ -1,8 +1,8 @@
-from utils.helpers import get_env_var, convert_datetime
+from utils.helpers import get_env_var, convert_datetime, public_emails
 from modules.historical_dns import mnemonic
 from modules.webpage_archives import wayback
 from modules.shodan_search import shodan
-from modules.get_infastructure import get_whois, public_emails
+from modules.get_infastructure import get_whois
 from modules.webpage_technology import wappalyzer
 from modules.scan_webpage import social
 from modules.subdomain import dnsdumpster, rapiddns, certspotter
@@ -44,7 +44,7 @@ class Domain():
         subdomains = await self.find_subdomain(domain)
 
         if domain not in public_emails():
-            #TODO find emails
+            #TODO find emails and analysis domain
             print(domain)
 
         if 80 in shodan_data or 443 in shodan_data.ports:

@@ -2,15 +2,10 @@ import os
 import sys
 import concurrent.futures
 from utils.helpers import QueryResponse
-from utils.user_agents import UserAgent
 import requests
 from utils.helpers import get_env_var
 import dataclasses
 
-
-header = {
-    "User-Agent": UserAgent("computer").user_agent
-}
 
 
 # path to the main folder of the project
