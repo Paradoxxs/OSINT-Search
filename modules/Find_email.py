@@ -2,8 +2,6 @@ import requests
 from utils.helpers import get_env_var
 import re
 
-from .emailformat import emailformat
-
 class hunterio():
     watched_events = ["DNS_NAME"]
     produced_events = ["EMAIL_ADDRESS", "DNS_NAME", "URL_UNVERIFIED"]
@@ -41,8 +39,6 @@ class hunterio():
 
 
 class skymem():
-    watched_events = ["DNS_NAME"]
-    produced_events = ["EMAIL_ADDRESS"]
     flags = ["passive", "email-enum", "safe"]
     meta = {"description": "Query skymem.info for email addresses"}
 

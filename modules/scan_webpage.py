@@ -1,5 +1,5 @@
 import re
-
+import requests
 
 class social():
 
@@ -21,13 +21,15 @@ class social():
 
 
 
-    async def handle_event(self, event):
+    async def query(self, domain):
+        SO_profile = []
+        response = requests.get(domain)
         for platform, regex in self.compiled_regexes.items():
-            for match in regex.finditer(event.data):
+            for match in regex.finditer(response.content):
                 url = match.group()
                 if not url.startswith("http"):
                     url = f"https://{url}"
                 profile_name = match.groups()[0]
-                self.emit_event(
-                    {"platform": platform, "url": url, "profile_name": profile_name}, "SOCIAL", source=event
+                SO_profile.append(
+                    {"platform": platform, "url": url, "profile_name": profile_name,"source":domain}
                 )

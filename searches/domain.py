@@ -3,11 +3,33 @@ from modules.historical_dns import mnemonic
 from modules.webpage_archives import wayback
 from modules.shodan_search import shodan
 from modules.get_infastructure import get_whois, public_emails
+from modules.webpage_technology import wappalyzer
+from modules.scan_webpage import social
+from modules.subdomain import dnsdumpster, rapiddns, certspotter
+from modules.Find_email import skymem
 import requests
 import json
 
 class Domain():
-    async def search(domain):
+
+    async def find_emails(self,domain):
+        emails = []
+        emails.extend(skymem.query(domain))
+    async def find_subdomain(self,domain):
+        print(domain)
+        subdomain = []
+        subdomain.extend(dnsdumpster.query(domain))
+        subdomain.extend(rapiddns.query(domain))
+        subdomain.extend(certspotter.query(domain))
+        # remove duplicates
+        subdomain = list(set(subdomain))
+        return subdomain
+    async def webpage_analsis(self,domain):
+        webtech = wappalyzer.wappalyze(self,domain)
+        socials = social.query(domain)
+
+
+    async def search(self,domain):
         WHOIS_hits = get_whois(domain)
 
         #host.io
@@ -19,19 +41,26 @@ class Domain():
         shodan_data = shodan.favicon_search(domain)
         hist_dns_data = mnemonic.query(domain)
         wayback_data = wayback.query(domain)
-        
+        subdomains = await self.find_subdomain(domain)
+
+        if domain not in public_emails():
+            #TODO find emails
+            print(domain)
+
+        if 80 in shodan_data or 443 in shodan_data.ports:
+            webpage_data = self.webpage_analsis(domain)
+            
+
         data = {
             "WhoIs": WHOIS_hits,
             "Shodan": shodan_data,
             "HistoricalDNS": hist_dns_data,
             "Wayback": wayback_data,
             "JSON": json_result,
-            "result": result
+            "result": result,
+            "technology":webpage_data,
+            "subdomain":subdomains
         }
-
-        if domain not in public_emails():
-            #TODO find emails
-            print(domain)
 
         
         return data 

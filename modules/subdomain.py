@@ -39,6 +39,7 @@ class shodan_dns():
     meta = {"description": "Query Shodan for subdomains", "auth_required": True}
     base_url = "https://api.shodan.io"
     api_key = get_env_var("shodan_key")
+    #limited 
 
     async def request_url(self, query):
         url = f"{self.base_url}/dns/domain/{self.helpers.quote(query)}?key={self.api_key}"
