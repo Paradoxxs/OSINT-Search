@@ -3,6 +3,10 @@ import re
 from bs4 import BeautifulSoup
 from utils.helpers import get_env_var
 
+
+_dns_name_regex = r"(?:\w(?:[\w-]{0,100}\w)?\.)+(?:[xX][nN]--)?[^\W_]{1,63}\.?"
+dns_name_regex = re.compile(_dns_name_regex, re.I)
+
 class rapiddns():
     meta = {"description": "Query rapiddns.io for subdomains"}
 
@@ -11,20 +15,18 @@ class rapiddns():
     def parse_results(self, r, domain):
         results = set()
         text = getattr(r, "text", "")
-        for match in self.helpers.regexes.dns_name_regex.findall(text):
+        for match in dns_name_regex.findall(text):
             match = match.lower()
             if match.endswith(domain):
                 results.add(match)
         return results
 
-    async def request_url(self, domain):
-        url = f"{self.base_url}/subdomain/{domain}?full=1#result"
-        response = requests.get(url)
-        return response
+
 
     async def query(self,domain):
-        res = self.request_url(domain)
-        if res.status_code is not 200:
+        url = f"{self.base_url}/subdomain/{domain}?full=1#result"
+        res = requests.get(url)
+        if res.status_code != 200:
             self.verbose(f"Error retrieving reverse whois results (status code: {res.status_code})")
         else:
             results = self.parse_results(res,domain)
@@ -35,16 +37,12 @@ class rapiddns():
 
 
 
-class shodan_dns():
+class shodan_dns:
     meta = {"description": "Query Shodan for subdomains", "auth_required": True}
     base_url = "https://api.shodan.io"
     api_key = get_env_var("shodan_key")
     #limited 
 
-    async def request_url(self, query):
-        url = f"{self.base_url}/dns/domain/{self.helpers.quote(query)}?key={self.api_key}"
-        response = await self.request_with_fail_count(url)
-        return response
 
     def parse_results(self, r, query):
         json = r.json()
@@ -54,8 +52,9 @@ class shodan_dns():
 
     async def query(self,domain):
         results = []
-        res = self.request_url(domain)
-        if res.status_code is not 200:
+        url = f"{self.base_url}/dns/domain/{domain}?key={self.api_key}"
+        res = requests.get(url)
+        if res.status_code != 200:
             self.verbose(f"Error retrieving reverse whois results (status code: {res.status_code})")
             return results
         else:
@@ -63,23 +62,20 @@ class shodan_dns():
                 results.append(subdomain)
             return results
 
-class dnsdumpster():
+class dnsdumpster:
     meta = {"description": "Query dnsdumpster for subdomains"}
     base_url = "https://dnsdumpster.com"
 
     async def query(self, domain):
         ret = []
         # first, get the CSRF tokens
-        res1 = await requests.get(self.base_url)
+        res1 = requests.get(self.base_url)
         status_code = res1.status_code
-        if status_code in 429:
+        if status_code == 429:
             self.verbose(f'Too many requests "{status_code}"')
             return ret
-        elif status_code is not 200:
-            self.verbose(f'Bad response code "{status_code}" from DNSDumpster')
+        elif status_code != 200:
             return ret
-        else:
-            self.debug(f'Valid response code "{status_code}" from DNSDumpster')
         html = BeautifulSoup(res1.content, "html.parser")
         csrftoken = None
         csrfmiddlewaretoken = None
@@ -97,15 +93,6 @@ class dnsdumpster():
             pass
 
         # Abort if we didn't get the tokens
-        if not csrftoken or not csrfmiddlewaretoken:
-            self.verbose("Error obtaining CSRF tokens")
-            self.errorState = True
-            return ret
-        else:
-            self.debug("Successfully obtained CSRF tokens")
-
-        if self.scan.stopping:
-            return
 
         # Otherwise, do the needful
         subdomains = set()
@@ -122,8 +109,7 @@ class dnsdumpster():
             },
         )
         status_code = res2.status_code
-        if status_code is not 200:
-            self.verbose(f'Bad response code "{status_code}" from DNSDumpster')
+        if status_code != 200:
             return ret
 
         html = BeautifulSoup(res2.content, "html.parser")
@@ -135,7 +121,7 @@ class dnsdumpster():
         return list(subdomains)
     
 
-class binaryedge():
+class binaryedge:
 
     meta = {"description": "Query the BinaryEdge API", "auth_required": True}
     base_url = "https://api.binaryedge.io/v2"
@@ -143,13 +129,10 @@ class binaryedge():
 
     async def request_left(self):
         url = f"{self.base_url}/user/subscription"
-        j = (await requests.get(url, headers=self.headers)).json()
+        j = (requests.get(url, headers=self.headers)).json()
         assert j.get("requests_left", 0) > 0
 
-    async def request_url(self, domain):
-        # todo: host query (certs + services)
-        url = f"{self.base_url}/query/domains/subdomain/{domain}"
-        return await requests.get(url, headers=self.headers)
+
 
     def parse_results(self, r, query):
         j = r.json()
@@ -158,20 +141,19 @@ class binaryedge():
     async def query(self,domain):
         req_left = self.request_left()
         if req_left > 0:
-            response = self.request_url(domain)
-            if response.status_code is 200:
+            url = f"{self.base_url}/query/domains/subdomain/{domain}"
+            response = requests.get(url, headers=self.headers)
+            if response.status_code == 200:
                 result = self.parse_results(response,domain)
                 return result
             
 
 
-class certspotter():
+class certspotter:
     meta = {"description": "Query Certspotter's API for subdomains"}
     base_url = "https://api.certspotter.com/v1"
 
-    def request_url(self, query):
-        url = f"{self.base_url}/issuances?domain={query}&include_subdomains=true&expand=dns_names"
-        return requests(url)
+
 
     def parse_results(self, r, query):
         json = r.json()
@@ -181,14 +163,15 @@ class certspotter():
                     yield dns_name.lstrip(".*").rstrip(".")
 
     async def query(self,domain):
-        response = self.request_url(domain)
-        if response.status_code is 200:
+        url = f"{self.base_url}/issuances?domain={domain}&include_subdomains=true&expand=dns_names"
+        response = requests.get(url)
+        if response.status_code == 200:
             result = self.parse_results(response,domain)
             return result
         
 
 
-class chaos():
+class chaos:
 
     meta = {"description": "Query ProjectDiscovery's Chaos API for subdomains", "auth_required": True}
 
@@ -197,9 +180,6 @@ class chaos():
     base_url = "https://dns.projectdiscovery.io/dns"
 
 
-    async def request_url(self, domain):
-        url = f"{self.base_url}/{domain}/subdomains"
-        return await requests.get(url, headers={"Authorization": self.api_key})
 
     def parse_results(self, r, query):
         j = r.json()
@@ -217,8 +197,9 @@ class chaos():
                         yield full_subdomain
 
     async def query(self,domain):
-        response = self.request_url(domain)
-        if response.status_code is 200:
+        url = f"{self.base_url}/{domain}/subdomains" 
+        response = requests.get(url, headers={"Authorization": self.api_key})
+        if response.status_code == 200:
             result = self.parse_results(response,domain)
             return result
         

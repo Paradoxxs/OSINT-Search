@@ -14,8 +14,10 @@ class Email():
         return username,domain
     #TODO split email up in username and domain and perform search on each, maybe check the domain of the mail no need to analysis gmail and similar emails
     async def search(self,email):
+
+        data = {}
         username,domain = self.splitEmail(email)
-        holehe_data = asyncio.run(holehe.query(email))
+        holehe_data = await holehe().query(email)
         # append source to holehe hits
         for hit in holehe_data:
             hit["source"] = "holehe"
@@ -38,25 +40,24 @@ class Email():
         hits = holehe_data + poastal_hits
         
         if email.endswith("@gmail.com"):
-            gdata = asyncio.run(ghunt.query(email))
-            if gdata is not False:
-                dict_hits = {item["domain"]: item for item in hits}
-                result = {**dict_hits, **gdata}
-            
-        json_result = json.dumps(result, default=convert_datetime)
+            gdata = await ghunt().query(email)
 
-        if domain not in public_emails():
-            domain_data = asyncio.run(Domain.search(domain))
+ 
+        if domain != public_emails():
+            domain_data = await Domain().search(domain)
 
-        username_lookup = asyncio.run(Username.search(username))
+        username_lookup = await Username().search(username)
 
-        data = {
-            "hits":hits,
-            "Jresults": json_result,
-            "Username":username_lookup,
-            "domain":domain_data,
-            "gdata":gdata
-        }
+        #check value is empty if not add to dict
+        if hits != None:
+            data["hits"] = hits
+        if gdata != None:
+            data["gdata"] = gdata
+        if username_lookup != None:
+            data["Username"] = username_lookup
+        if domain_data != None:
+            data["domain"] = domain_data
+        
 
         #TODO compromised email
         return data 

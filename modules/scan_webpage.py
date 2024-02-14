@@ -1,7 +1,7 @@
 import re
 import requests
 
-class social():
+class social:
 
     meta = {"description": "Look for social media links in webpages"}
 

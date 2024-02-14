@@ -2,7 +2,7 @@ import phonenumbers
 from phonenumbers import carrier, geocoder, timezone
 
 
-class pyPhonenumber():
+class pyPhonenumber:
 
     def query(PhoneNumber):
         default_region = "ID"  # DEFAULT NEGARA INDONESIA

@@ -1,6 +1,6 @@
 import requests 
 from utils.helpers import get_env_var
-class breachdirectory():
+class breachdirectory:
     
     #https://rapidapi.com/rohan-patra/api/breachdirectory
     base_url = "https://breachdirectory.p.rapidapi.com/"
@@ -20,7 +20,7 @@ class breachdirectory():
 
 
 
-class leaklookup():
+class leaklookup:
 
     #https://leak-lookup.com/api
     api_key = get_env_var("leaklookup_api")

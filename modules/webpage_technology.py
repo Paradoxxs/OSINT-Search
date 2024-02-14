@@ -9,12 +9,12 @@ warnings.filterwarnings(
 )
 
 
-class wappalyzer():
+class wappalyzer:
 
     meta = {"description": "Extract technologies from web responses",}
-    wappalyzer = Wappalyzer.latest()
+    Wanalyzer = Wappalyzer.latest()
 
 
-    def wappalyze(self, domain):
+    async def query(self, domain):
         page = WebPage.new_from_url(domain)
-        return wappalyzer.analyze(page)
+        return self.Wanalyzer.analyze(page)

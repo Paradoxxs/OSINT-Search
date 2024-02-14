@@ -1,7 +1,7 @@
 import dns.resolver
 
 
-class dnsresolver():
+class dnsresolver:
     record_type = ["MX","ns","TXT"]
 
     async def query(self,domain):

@@ -2,13 +2,13 @@ import requests
 from datetime import datetime
 
 
-class mnemonic():
+class mnemonic:
     base_url = "https://api.mnemonic.no"
     async def query(self,domain):
         
 
         url = f"{self.base_url}/pdns/v3/{domain}"
-        response = await requests.get(url)
+        response = requests.get(url)
         if response.status_code == 200:
             results = response.json()
             for result in results["data"]:

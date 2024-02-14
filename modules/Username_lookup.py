@@ -73,7 +73,7 @@ def get_sherlock(username):
 
 
 
-class wmn():
+class wmn:
 
     def get_data(self,username, checker_dict):
 
@@ -94,17 +94,9 @@ class wmn():
             url_pretty = url
 
 
-        # custom client
-        # we use a dict for shared args
-        # but tls_client does not have a timeout (it is hardcoded to 10 sec) where as requests does
-        args = {
-            "headers": header,
-            "allow_redirects": False
-        }
-
         # now we make the request
         try:
-            r = requests.get(url, **args)
+            r = requests.get(url)
         except Exception as e:
             #unable to connect
             response.exists = None
@@ -141,7 +133,7 @@ class wmn():
 
     def get_sites_from_github(self):
         r = requests.get(
-            "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json", headers=header)
+            "https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json")
         data = r.json()
         github_sites = data["sites"]
         return github_sites

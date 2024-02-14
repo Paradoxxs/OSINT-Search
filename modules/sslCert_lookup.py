@@ -1,6 +1,6 @@
 import requests
 
-class crt():
+class crt:
     meta = {"description": "Query crt.sh (certificate transparency) for subdomains"}
 
     base_url = "https://crt.sh"
@@ -12,7 +12,7 @@ class crt():
 
     async def request_url(self, domain):
         url = f"{self.base_url}/?q={domain}&output=json"
-        return await requests.get(url)
+        return requests.get(url)
 
     def parse_results(self, r, query):
         j = r.json()

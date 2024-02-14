@@ -1,8 +1,8 @@
 import requests 
 
 
-class wayback():
-    def query(self,domain):
+class wayback:
+    async def query(self,domain):
         url = "https://web.archive.org/web/timemap/json?url={}".format(domain)
 
         response = requests.get(url)

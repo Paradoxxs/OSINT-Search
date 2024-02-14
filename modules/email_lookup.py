@@ -1,6 +1,6 @@
 import requests
 
-class emailrep():
+class emailrep:
 
     # https://emailrep.io/
     

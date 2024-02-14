@@ -49,16 +49,16 @@ def get_poastal(email):
 
 
 
-class ghunt():
+class ghunt:
     async def query(self,email):
         #check if data is an gmail
-
         try:
             ghunt_creds = GHuntCreds(get_env_var("ghunt_cookie"))
             ghunt_creds.load_creds()
             as_client = httpx.AsyncClient()
             people_api = PeoplePaHttp(ghunt_creds)
             found, person = await people_api.people_lookup(as_client, email)
+            print("ghust: data is {} and is {}".format(found,person))
             if found:
                 profile = {
                     "google_id":person.personId,
@@ -67,12 +67,12 @@ class ghunt():
                 }
                 return profile
             else:
-                return False
+                return None
         except:
-            return False
+            return None
     
 
-class holehe():
+class holehe:
 
 
     async def holehe_wrapper(self,email):

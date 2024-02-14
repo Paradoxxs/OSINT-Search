@@ -1,34 +1,21 @@
 
 import requests
 from utils.helpers import get_env_var
-class Ipstack():
+class Ipstack:
     """
     Ipstack GeoIP
     Leverages the ipstack.com API to geolocate a host by IP address.
     """
 
     meta = {"description": "Query IPStack's GeoIP API", "auth_required": True}
-    options = {"api_key": ""}
-    options_desc = {"api_key": "IPStack GeoIP API Key"}
-    scope_distance_modifier = 1
-    _priority = 2
-    suppress_dupes = False
     api_key= (get_env_var("ipstack_api"))
     base_url = "http://api.ipstack.com"
 
-    async def setup(self):
-        return await self.require_api_key()
-
-    async def ping(self):
-        url = f"{self.base_url}/check?access_key={self.api_key}"
-        r = requests.get(url)
-        resp_content = r.content
-        assert r.status_code == 200, resp_content
 
     async def query(self, domain):
         try:
             url = f"{self.base_url}/{domain}?access_key={self.api_key}"
-            result = await requests(url)
+            result = requests(url)
             if result:
                 geo_data = result.json()
                 if not geo_data:
@@ -50,7 +37,7 @@ class Ipstack():
 
 
 
-class IP2Location():
+class IP2Location:
     """
     IP2Location.io Geolocation API.
     30K monthly limit
@@ -71,7 +58,7 @@ class IP2Location():
     async def query(self, IP):
         url = f"{self.base_url}/?key={self.api_key}&ip={IP}&format=json&source=bbot"
         try:
-            result = await requests(url)
+            result = requests(url)
             if result:
                 geo_data = result.json()
                 if not geo_data:
@@ -88,5 +75,7 @@ class IP2Location():
             if error_msg:
                 self.warning(error_msg)
         elif geo_data:
+            print(geo_data)
             return geo_data
+        
 

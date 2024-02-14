@@ -2,7 +2,7 @@ import requests
 from utils.helpers import get_env_var
 import re
 
-class hunterio():
+class hunterio:
     watched_events = ["DNS_NAME"]
     produced_events = ["EMAIL_ADDRESS", "DNS_NAME", "URL_UNVERIFIED"]
     flags = ["passive", "email-enum", "subdomain-enum", "safe"]
@@ -38,7 +38,7 @@ class hunterio():
 
 
 
-class skymem():
+class skymem:
     flags = ["passive", "email-enum", "safe"]
     meta = {"description": "Query skymem.info for email addresses"}
 

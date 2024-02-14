@@ -2,7 +2,7 @@ import re
 import requests
 import asyncio
 
-class viewdns():
+class viewdns:
     """
     Todo: Also retrieve registrar?
     """
