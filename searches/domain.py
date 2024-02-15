@@ -10,8 +10,18 @@ from modules.Find_email import skymem
 import requests
 import json
 import pandas as pd
+import aiodns
 
 class Domain():
+
+    async def domain_to_ip_async(self,domain):
+        resolver = aiodns.DNSResolver()
+        try:
+            result = await resolver.query(domain, 'A')
+            return result[0].host
+        except aiodns.error.DNSError:
+            return None
+    
 
     async def find_emails(self,domain):
         emails = []
@@ -27,10 +37,13 @@ class Domain():
         subdomain = list(set(subdomain))
         return subdomain
     
-    async def webpage_analsis(self,domain):
-        webtech = await wappalyzer().query(domain)
-        #socials = await social().query(domain)
-        return webtech
+    async def subdomain_analsis(self,domain):
+        tech = await wappalyzer().query(domain)
+        #TODO need to change the way social_data is stored it gets represented wrong in streamlit
+        social_data = await social().query(domain)
+        ip = await self.domain_to_ip_async(domain)
+        #TODO enrich ip data
+        return {"ip": ip,"technology": tech, "social": social_data}
 
 
     async def search(self,domain):
@@ -54,7 +67,11 @@ class Domain():
             # test if domain response to url requests
             subdomains_df = pd.DataFrame(subdomains, columns=["subdomain"])
             #subdomains_df["technology"]= subdomains_df["subdomain"].apply(self.webpage_analsis)
-            subdomains_df["technology"]= [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
+            #subdomains_df["technology"] = [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
+            results = [await self.subdomain_analsis(r) for r in subdomains_df["subdomain"]]
+            subdomains_df = subdomains_df.join(pd.DataFrame.from_dict(results))   
+
+
 
         if shodan_data is not None:
             data["shodan"] = shodan_data
