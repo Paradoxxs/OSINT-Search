@@ -29,7 +29,7 @@ class Domain():
     
     async def webpage_analsis(self,domain):
         webtech = await wappalyzer().query(domain)
-        socials = await social().query(domain)
+        #socials = await social().query(domain)
         return webtech
 
 
@@ -50,9 +50,11 @@ class Domain():
             #TODO find emails and analysis domain
             print(domain)
 
-        # test if domain response to url requests
-
-        webpage_data = self.webpage_analsis(domain)
+        if subdomains is not None:
+            # test if domain response to url requests
+            subdomains_df = pd.DataFrame(subdomains, columns=["subdomain"])
+            #subdomains_df["technology"]= subdomains_df["subdomain"].apply(self.webpage_analsis)
+            subdomains_df["technology"]= [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
 
         if shodan_data is not None:
             data["shodan"] = shodan_data
@@ -62,8 +64,8 @@ class Domain():
             data["Wayback"] = wayback_data
         if webpage_data is not None:
             data["technology"] = webpage_data
-        if subdomains is not None:
-            data["subdomain"] = subdomains
+        if subdomains_df is not None:
+            data["subdomain"] = subdomains_df
         if hostIO is not None:
             data["hostIO"] = hostIO.json()
         if WHOIS_hits is not None:

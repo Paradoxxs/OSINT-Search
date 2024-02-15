@@ -23,13 +23,18 @@ class social:
 
     async def query(self, domain):
         SO_profile = []
-        response = requests.get(domain)
-        for platform, regex in self.compiled_regexes.items():
-            for match in regex.finditer(response.content):
-                url = match.group()
-                if not url.startswith("http"):
-                    url = f"https://{url}"
-                profile_name = match.groups()[0]
-                SO_profile.append(
-                    {"platform": platform, "url": url, "profile_name": profile_name,"source":domain}
-                )
+        try:
+            response = requests.get("http://{}".format(domain),timeout=5)
+            for platform, regex in self.compiled_regexes.items():
+                for match in regex.finditer(response.content):
+                    url = match.group()
+                    if not url.startswith("http"):
+                        url = f"https://{url}"
+                    profile_name = match.groups()[0]
+                    SO_profile.append(
+                        {"platform": platform, "url": url, "profile_name": profile_name,"source":domain}
+                    )
+            return SO_profile
+        except Exception as e:
+            print(e)
+            pass
