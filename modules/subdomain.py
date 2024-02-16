@@ -155,18 +155,20 @@ class certspotter:
 
 
 
-    def parse_results(self, r, query):
+    def parse_results(self, r):
         json = r.json()
+        dns_names = []
         if json:
             for r in json:
                 for dns_name in r.get("dns_names", []):
-                    yield dns_name.lstrip(".*").rstrip(".")
+                    dns_names.append(dns_name.lstrip(".*").rstrip("."))
+        return dns_names
 
     async def query(self,domain):
         url = f"{self.base_url}/issuances?domain={domain}&include_subdomains=true&expand=dns_names"
         response = requests.get(url)
         if response.status_code == 200:
-            result = self.parse_results(response,domain)
+            result = self.parse_results(response)
             return result
         
 
@@ -205,4 +207,14 @@ class chaos:
         
 
 
-        
+
+class Subdomain:
+
+    async def search(self,domain):
+        subdomains = []
+        subdomains.extend(await dnsdumpster().query(domain))
+        subdomains.extend(await rapiddns().query(domain))
+        subdomains.extend(await certspotter().query(domain))
+        # remove duplicates
+        subdomains = list(set(subdomains))
+        return subdomains

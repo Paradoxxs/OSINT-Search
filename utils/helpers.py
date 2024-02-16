@@ -21,6 +21,12 @@ def convert_datetime(obj):
 def public_emails():
     return ["gmail.com","hotmail.com","yahoo.com","aol.com","msn.com","live.com"]
 
+def splitEmail(email):
+    email_split = email.split("@")
+    username = email_split[0]
+    domain = email_split[1]
+    return username,domain
+
 @dataclass
 class QueryResponse:
     """All responses used in Enumerator must have `platform` and `selector`"""

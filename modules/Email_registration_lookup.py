@@ -40,12 +40,11 @@ except Exception as e:
     pass
 
 
-
-
-
 def get_poastal(email):
-    return poastal.check_email(email)
-
+    try:
+        return poastal.check_email(email)
+    except: 
+        return {}
 
 
 

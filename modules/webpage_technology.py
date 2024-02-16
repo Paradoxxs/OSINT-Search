@@ -17,8 +17,11 @@ class wappalyzer:
 
     async def query(self, domain):
         try:
-          page = WebPage.new_from_url("http://{}".format(domain),timeout=5)
+          page = WebPage.new_from_url("http://{}".format(domain),timeout=2)
           return self.Wanalyzer.analyze(page)
+        except ConnectionError as e:
+            print(e)
+            return None
         except Exception as e:
             print(e)
             return None

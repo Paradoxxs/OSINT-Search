@@ -1,7 +1,0 @@
-service:
-  osint_search:
-    image: osint-search
-    env_file:
-      config.env
-    ports:
-      - 8080:8080

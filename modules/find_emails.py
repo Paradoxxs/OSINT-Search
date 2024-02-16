@@ -1,5 +1,6 @@
 import requests
 from utils.helpers import get_env_var
+import utils.regexes as regexes
 import re
 
 class hunterio:
@@ -48,22 +49,22 @@ class skymem:
         emails = []
         # get first page
         url = f"{self.base_url}/srch?q={domain}"
-        r = await self.request_with_fail_count(url)
+        r = requests.get(url)
         if not r:
-            return
-        for email in self.helpers.extract_emails(r.text):
+            return emails
+        for email in regexes.extract_emails(r.text):
             emails.append(email)
 
         # iterate through other pages
         domain_ids = re.findall(r'<a href="/domain/([a-z0-9]+)\?p=', r.text, re.I)
         if not domain_ids:
-            return
+            return emails
         domain_id = domain_ids[0]
         for page in range(2, 22):
-            r2 = await self.request_with_fail_count(f"{self.base_url}/domain/{domain_id}?p={page}")
+            r2 = requests.get(f"{self.base_url}/domain/{domain_id}?p={page}")
             if not r2:
                 continue
-            for email in self.helpers.extract_emails(r2.text):
+            for email in regexes.extract_emails(r2.text):
                 emails.append(email)
             pages = re.findall(r"/domain/" + domain_id + r"\?p=(\d+)", r2.text)
             if not pages:
@@ -73,3 +74,18 @@ class skymem:
                 break
         
         return emails
+    
+
+class FindEmail:
+    
+    async def query(self, domain):
+        emails = []
+        emails.extend(await skymem().query(domain))
+        #emails.extend(await hunterio().query(domain))
+        #remove duplicates
+        emails = list(set(emails))
+        #remove emails that does not contain domain
+        emails = [email for email in emails if domain in email]
+        return emails
+    
+    

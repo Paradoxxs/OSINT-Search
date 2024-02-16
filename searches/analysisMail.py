@@ -1,15 +1,13 @@
-
+import asyncio
 from modules.Email_registration_lookup import holehe, get_poastal, ghunt
 import json
 from searches.username import Username
 from utils.helpers import splitEmail
-class Email():
-
+class Analysis_email:
     
-
-    
-    async def analysis(self,email):
+    async def analysisEmail(self,email):
         data = {}
+        username,domain = splitEmail(email)
         holehe_data = await holehe().query(email)
         # append source to holehe hits
         for hit in holehe_data:
@@ -34,7 +32,7 @@ class Email():
 
         username_lookup = await Username().search(username)
 
-       #check value is empty if not add to dict
+        #check value is empty if not add to dict
         if hits != None:
             data["hits"] = hits
         if gdata != None:
@@ -42,31 +40,7 @@ class Email():
         if username_lookup != None:
             data["Username"] = username_lookup
 
-
         
 
         #TODO compromised email
         return data 
-
-    #TODO split email up in username and domain and perform search on each, maybe check the domain of the mail no need to analysis gmail and similar emails
-    async def search(self,email):
-
-        data = {}
-        username,domain = splitEmail(email)
-        data = await self.analysis(email)
-
- 
- 
-
-        username_lookup = await Username().search(username)
-
-        #check value is empty if not add to dict
-        if username_lookup != None:
-            data["Username"] = username_lookup
-    
-        
-
-        #TODO compromised email
-        return data 
-    
-

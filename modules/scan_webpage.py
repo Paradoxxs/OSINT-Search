@@ -24,7 +24,7 @@ class social:
     async def query(self, domain):
         SO_profile = []
         try:
-            response = requests.get("http://{}".format(domain),timeout=5)
+            response = requests.get("http://{}".format(domain),timeout=2)
             for platform, regex in self.compiled_regexes.items():
                 for match in regex.finditer(response.text):
                     url = match.group()
@@ -35,7 +35,9 @@ class social:
                         {"platform": platform, "url": url, "profile_name": profile_name}
                     )
             return SO_profile
-        except Exception as e:
-            SO_profile.append({})
+        except ConnectionError as e:
             print(e)
-            pass
+            return None
+        except Exception as e:
+            print(e)
+            return None

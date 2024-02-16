@@ -6,12 +6,13 @@ from modules.get_infastructure import get_whois
 from modules.webpage_technology import wappalyzer
 from modules.scan_webpage import social
 from modules.subdomain import dnsdumpster, rapiddns, certspotter
-from modules.Find_email import skymem
+from modules.find_emails import FindEmail
 import requests
 import json
 import pandas as pd
 import aiodns
-
+from searches.analysisMail import Analysis_email
+import asyncio
 class Domain():
 
     async def domain_to_ip_async(self,domain):
@@ -24,8 +25,16 @@ class Domain():
     
 
     async def find_emails(self,domain):
-        emails = []
-        emails.extend(skymem().query(domain))
+        if domain not in public_emails():
+            emails = await FindEmail().query(domain)
+            if emails != None:
+                emails = list(set(emails))
+                tasks = [asyncio.create_task(Analysis_email().analysisEmail(mail)) for mail in emails]
+                results = await asyncio.gather(*tasks)
+                df = pd.DataFrame(emails)
+                df = df.join(pd.DataFrame.from_dict(results))
+                return df
+        return None
 
     async def find_subdomain(self,domain):
         print(domain)
@@ -57,21 +66,12 @@ class Domain():
         shodan_data = await shodan().favicon_search(domain)
         hist_dns_data = await mnemonic().query(domain)
         wayback_data = await wayback().query(domain)
-        subdomains = await self.find_subdomain(domain)
-
-        if domain not in public_emails():
-            #TODO find emails and analysis domain
-            print(domain)
-
-        if subdomains is not None:
-            # test if domain response to url requests
-            subdomains_df = pd.DataFrame(subdomains, columns=["subdomain"])
-            #subdomains_df["technology"]= subdomains_df["subdomain"].apply(self.webpage_analsis)
-            #subdomains_df["technology"] = [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
-            results = [await self.subdomain_analsis(r) for r in subdomains_df["subdomain"]]
-            subdomains_df = subdomains_df.join(pd.DataFrame.from_dict(results))   
+        #subdomains = await self.find_subdomain(domain)
 
 
+
+
+        
 
         if shodan_data is not None:
             data["shodan"] = shodan_data
@@ -81,12 +81,23 @@ class Domain():
             data["Wayback"] = wayback_data
         if webpage_data is not None:
             data["technology"] = webpage_data
-        if subdomains_df is not None:
-            data["subdomain"] = subdomains_df
+
         if hostIO is not None:
             data["hostIO"] = hostIO.json()
         if WHOIS_hits is not None:
             data["WHOIS"] = WHOIS_hits
 
+
         
         return data 
+    
+"""         if subdomains_df is not None:
+            data["subdomain"] = subdomains_df """
+"""         if subdomains is not None:
+            # test if domain response to url requests
+            subdomains_df = pd.DataFrame(subdomains, columns=["subdomain"])
+            #subdomains_df["technology"]= subdomains_df["subdomain"].apply(self.webpage_analsis)
+            #subdomains_df["technology"] = [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
+            results = [await self.subdomain_analsis(r) for r in subdomains_df["subdomain"]]
+            subdomains_df = subdomains_df.join(pd.DataFrame.from_dict(results))   
+ """
