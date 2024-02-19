@@ -20,4 +20,4 @@ class Username():
         hits = sherlock_data + whm_data
 
         # TODO is the username compromised 
-        return hits
+        return {"usernames": hits}

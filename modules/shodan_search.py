@@ -20,18 +20,12 @@ class shodan:
             print(e)
             return False
         
-    def IP_services(self,ipAddress):
+    async def IP_services(self,ipAddress):
         try:
-            results = self.shodan_api.host(ipAddress)
-            return results
+            return self.shodan_api.host(ipAddress)
+             
         except Exception as e:
             print(e)
-            return False
+            return {}
         
     
-""" res = get_shodan_IP_services("8.8.8.8")
-print(type(res))
-print(res["ports"])
-print(res["hostnames"])
-print(type(res["data"]))
-print(res.get("hash", "n/a")) """

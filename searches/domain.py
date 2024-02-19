@@ -4,100 +4,112 @@ from modules.webpage_archives import wayback
 from modules.shodan_search import shodan
 from modules.get_infastructure import get_whois
 from modules.webpage_technology import wappalyzer
-from modules.scan_webpage import social
-from modules.subdomain import dnsdumpster, rapiddns, certspotter
+from modules.ip_lookup import IPLookup
 from modules.find_emails import FindEmail
+from modules.port_scan import PortScan
 import requests
-import json
-import pandas as pd
 import aiodns
-from searches.analysisMail import Analysis_email
 import asyncio
+from modules.scan_webpage import ScanWebpage, Find_Google_analytic_id
+from modules.subdomain import Subdomain as module_subdomain
+import socket
+
 class Domain():
 
-    async def domain_to_ip_async(self,domain):
+    async def domain_to_ip(self,domain):
         resolver = aiodns.DNSResolver()
         try:
             result = await resolver.query(domain, 'A')
             return result[0].host
         except aiodns.error.DNSError:
             return None
+        
+    async def test_connection(self,domain, timeout=2):
+    
+        try:
+            # Create a socket object
+            response = requests.get(f"https://{domain}",verify=True,timeout=timeout)
+            # Connection successful
+            print(f"Connected to {domain} successfully")
+            return True,response
+        except socket.error as e:
+            # Connection failed
+            print(f"Failed to connect to {domain}: {e}")
+            return False,None
     
 
     async def find_emails(self,domain):
         if domain not in public_emails():
             emails = await FindEmail().query(domain)
-            if emails != None:
-                emails = list(set(emails))
-                tasks = [asyncio.create_task(Analysis_email().analysisEmail(mail)) for mail in emails]
-                results = await asyncio.gather(*tasks)
-                df = pd.DataFrame(emails)
-                df = df.join(pd.DataFrame.from_dict(results))
-                return df
+            return emails
         return None
 
-    async def find_subdomain(self,domain):
-        print(domain)
-        subdomain = []
-        subdomain.extend(await dnsdumpster().query(domain))
-        subdomain.extend(await rapiddns().query(domain))
-        subdomain.extend(await certspotter().query(domain))
-        # remove duplicates
-        subdomain = list(set(subdomain))
-        return subdomain
+        
+
+    async def webpage_analysis(self,response):
+        tech = await wappalyzer().query(response)
+        social_data,Google_analytic_id = await ScanWebpage().query(response)
+        return tech,social_data,Google_analytic_id
+
+
+    async def analysis(self,domain):
+        
+        ##TODO Should I analyze all the subdomain to the level I do? it can quickly take a lot of time.
+        data = {"domain":domain}
+        ip = await self.domain_to_ip(domain)
+        hist_dns_data = await mnemonic().query(domain)
+        wayback_data = await wayback().query(domain)
+
+        if ip != None:
+            nmap = await PortScan().query(ip)
+            ipwhois = await IPLookup().query(ip)
+            if ipwhois != None:
+                data["ip_whois"] = ipwhois
+            if nmap is not None:
+                data["nmap"] = nmap
+            available,res = await self.test_connection(domain)
+            if available:
+                tech,social_data,Google_analytic_id = await self.webpage_analysis(res)
+                if Google_analytic_id is not None:
+                    data["Google_analytic_id"] = Google_analytic_id
+                if tech is not None:
+                    data["Technology"] = tech
+                if social_data is not None:
+                    data["Social"] = social_data
+
+        if wayback_data is not None:
+            data["Wayback"] = wayback_data
+        if hist_dns_data is not None:
+            data["HistoricalDNS"] = hist_dns_data
+        return data
+        
     
-    async def subdomain_analsis(self,domain):
-        tech = await wappalyzer().query(domain)
-        #TODO need to change the way social_data is stored it gets represented wrong in streamlit
-        social_data = await social().query(domain)
-        ip = await self.domain_to_ip_async(domain)
-        #TODO enrich ip data
-        return {"ip": ip,"technology": tech, "social": social_data}
-
-
     async def search(self,domain):
         data = {}
-        WHOIS_hits = get_whois(domain)
-        wayback_data = None
-        webpage_data = None
+
+        WHOIS_data = get_whois(domain)
+        emails = await self.find_emails(domain)
+
+        subdomains = await module_subdomain().search(domain)
+        if subdomains is not None:
+            #TODO optimize so we do not lookup the same IP multiple times
+            tasks = [asyncio.create_task(self.analysis(subdomain))  for subdomain in subdomains]
+            subdomains = await asyncio.gather(*tasks)
+             
+
+        
         hostIO = requests.request("GET", f"https://host.io/api/full/{domain}?token={get_env_var('hostIO_api')}")
 
 
-        shodan_data = await shodan().favicon_search(domain)
-        hist_dns_data = await mnemonic().query(domain)
-        wayback_data = await wayback().query(domain)
-        #subdomains = await self.find_subdomain(domain)
 
-
-
-
-        
-
-        if shodan_data is not None:
-            data["shodan"] = shodan_data
-        if hist_dns_data is not None:
-            data["HistoricalDNS"] = hist_dns_data
-        if wayback_data is not None:
-            data["Wayback"] = wayback_data
-        if webpage_data is not None:
-            data["technology"] = webpage_data
-
+        if emails != None:
+            data["emails"] = emails
         if hostIO is not None:
             data["hostIO"] = hostIO.json()
-        if WHOIS_hits is not None:
-            data["WHOIS"] = WHOIS_hits
-
-
-        
+        if WHOIS_data is not None:
+            data["WHOIS"] = WHOIS_data
+        if subdomains is not None:
+            data["subdomains"] = subdomains
+     
         return data 
     
-"""         if subdomains_df is not None:
-            data["subdomain"] = subdomains_df """
-"""         if subdomains is not None:
-            # test if domain response to url requests
-            subdomains_df = pd.DataFrame(subdomains, columns=["subdomain"])
-            #subdomains_df["technology"]= subdomains_df["subdomain"].apply(self.webpage_analsis)
-            #subdomains_df["technology"] = [await self.webpage_analsis(r) for r in subdomains_df["subdomain"]]
-            results = [await self.subdomain_analsis(r) for r in subdomains_df["subdomain"]]
-            subdomains_df = subdomains_df.join(pd.DataFrame.from_dict(results))   
- """

@@ -15,10 +15,15 @@ class wappalyzer:
     Wanalyzer = Wappalyzer.latest()
 
 
-    async def query(self, domain):
+    async def query(self, response):
         try:
-          page = WebPage.new_from_url("http://{}".format(domain),timeout=2)
-          return self.Wanalyzer.analyze(page)
+          page = WebPage.new_from_response(response)
+          tech = self.Wanalyzer.analyze(page)
+          #varify set have at least 1 technology
+          if len(tech) > 0:
+            return tech
+          else:
+            return None   
         except ConnectionError as e:
             print(e)
             return None

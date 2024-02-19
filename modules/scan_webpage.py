@@ -21,10 +21,9 @@ class social:
 
 
 
-    async def query(self, domain):
+    async def query(self, response):
         SO_profile = []
         try:
-            response = requests.get("http://{}".format(domain),timeout=2)
             for platform, regex in self.compiled_regexes.items():
                 for match in regex.finditer(response.text):
                     url = match.group()
@@ -34,10 +33,43 @@ class social:
                     SO_profile.append(
                         {"platform": platform, "url": url, "profile_name": profile_name}
                     )
-            return SO_profile
-        except ConnectionError as e:
-            print(e)
-            return None
+            #check if SO_profile have at least 1 profile
+            if len(SO_profile) > 0:
+                return SO_profile
+            else:
+                return None
         except Exception as e:
             print(e)
             return None
+
+
+class Find_Google_analytic_id:
+
+    meta = {"description": "Look for social media links in webpages"}
+
+    google_analytic_id_regex = r"UA-[0-9]{4,9}-[0-9]{1,3}"
+
+    compiled_regex = re.compile(google_analytic_id_regex) 
+
+
+
+    async def query(self, response):
+        try:
+            for match in self.compiled_regex.finditer(response.text):
+                id = match.group()
+                if not id.startswith("UA-"):
+                    continue
+                return id
+        except Exception as e:
+            print(e)
+            return None
+
+
+class ScanWebpage():
+    
+
+    async def query(self, response):
+        social_data =  await social().query(response)
+        analytic_id = await Find_Google_analytic_id().query(response)
+
+        return social_data,analytic_id

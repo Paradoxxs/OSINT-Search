@@ -5,7 +5,7 @@ from searches.username import Username
 from utils.helpers import splitEmail
 class Analysis_email:
     
-    async def analysisEmail(self,email):
+    async def analysis(self,email):
         data = {}
         username,domain = splitEmail(email)
         holehe_data = await holehe().query(email)

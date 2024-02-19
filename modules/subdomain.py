@@ -211,10 +211,22 @@ class chaos:
 class Subdomain:
 
     async def search(self,domain):
-        subdomains = []
-        subdomains.extend(await dnsdumpster().query(domain))
-        subdomains.extend(await rapiddns().query(domain))
-        subdomains.extend(await certspotter().query(domain))
-        # remove duplicates
-        subdomains = list(set(subdomains))
-        return subdomains
+        try:
+            subdomains = []
+            try:
+                subdomains.extend(await dnsdumpster().query(domain))
+            except:
+                pass
+            try:
+                subdomains.extend(await rapiddns().query(domain))
+            except:
+                pass
+            try:
+                subdomains.extend(await certspotter().query(domain))
+            except:
+                pass
+            # remove duplicates
+            subdomains = list(set(subdomains))
+            return subdomains
+        except:
+            return None

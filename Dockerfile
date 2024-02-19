@@ -8,6 +8,7 @@ RUN apt update && apt install -y python3-dev \
                         libffi-dev \
 			libxml2-dev \
 			libxslt-dev
+RUN apt-get install -y nmap
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install Cython
 RUN python3 -m pip install -r requirements.txt

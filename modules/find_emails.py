@@ -86,6 +86,8 @@ class FindEmail:
         emails = list(set(emails))
         #remove emails that does not contain domain
         emails = [email for email in emails if domain in email]
-        return emails
-    
+        if len(emails) > 0:
+            return emails
+        else:
+            return None
     

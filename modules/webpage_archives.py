@@ -3,11 +3,14 @@ import requests
 
 class wayback:
     async def query(self,domain):
-        url = "https://web.archive.org/web/timemap/json?url={}".format(domain)
+        try:
+            url = "https://web.archive.org/web/timemap/json?url={}".format(domain)
 
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
+            response = requests.get(url)
+            if response.status_code == 200:
+                return response.json()
+        except:
+            return 
 
 
 """ response = get_wayback("dr.dk")

@@ -1,19 +1,23 @@
-from modules.ip2geo import IP2Location
+from modules.ip_lookup import IPLookup
 import requests
 from modules.shodan_search import shodan
+from modules.port_scan import PortScan
 
 class IPaddress():
 
 
     async def search(self,ipAddress):
         data = {}
-        geo_data = IP2Location().query(ipAddress)
-        ipinfo_r = requests.request("GET", f"https://ipinfo.io/{ipAddress}/json")
-        shodan_data = shodan().IP_services(ipAddress)
-        if geo_data != None:
-            data["geo"] = geo_data
-        if ipinfo_r != None:
-            data["ipinfo"] = ipinfo_r.json()
+        ip_lookup = await IPLookup().query(ipAddress)
+        shodan_data = await shodan().IP_services(ipAddress)
+        nmap = await PortScan().query(ipAddress)
+
+
+        if ip_lookup != None:
+            data["ip_Whois"] = ip_lookup
         if shodan_data != None:
-            data["shodan"] = shodan_data
+            data["shodan_ip"] = shodan_data
+        if nmap != None:
+            data["nmap"] = nmap
+
         return data

@@ -12,5 +12,5 @@ docker build -t osint-search .
 Running the container:
 
 ```
-docker run -p 8080:8080 -d osint_search
+docker run -p 8080:8501 -d osint_search
 ``` 

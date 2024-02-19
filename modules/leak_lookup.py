@@ -37,5 +37,3 @@ class leaklookup:
         return response.json()  # or any other desired processing of the response
 
 
-
-#TODO https://intelx.io/

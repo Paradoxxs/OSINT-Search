@@ -1,5 +1,4 @@
 import streamlit as st 
-import json
 import requests
 import asyncio
 from utils.helpers import UserAgent
@@ -7,80 +6,91 @@ from searches.ip import IPaddress
 from searches.username import Username
 from searches.email import Email
 from searches.domain import Domain
-import pandas as pd
-import numpy as np
-from searches.subdomain import Subdomain
 from utils.helpers import splitEmail,public_emails
+
+##TODO present data in a nice way, e.g. 2-3 columns
+st.set_page_config(page_title="OSINT-search", page_icon=":dog:",layout="wide",initial_sidebar_state="expanded",menu_items={'About': "This is in WIP"})
+st.markdown("# Main page")
+st.write("Hello, OSINT!")
+
 
 username_search = Username()
 ip_search = IPaddress()
 domain_search = Domain()
 email_search = Email()
 
+
+
 USER_AGENT = UserAgent().user_agent
 requests.utils.default_user_agent = lambda: USER_AGENT
 Methods = ["email","username","IP","Domain"]
 
-st.write("Hello, OSINT!")
+
+
+def present_data(k,v):
+    st.write(k)
+    if k == "subdomains":
+        for d in v:
+            st.write(d["domain"])
+            st.json(d,expanded=False)
+    elif k == "shodan_ip":
+        st.write(v)
+    elif k == "usernames":
+        st.dataframe(v)
+    elif k == "emails":
+        st.dataframe(v)
+    elif k == "Email_registration":
+        st.dataframe(v)
+    elif k == "ip_Whois":
+        st.write(v)
+    elif k == "WHOIS":
+        st.json(v,expanded=False)
+    elif k == "hostIO":
+        st.json(v,expanded=False)
+    elif k == "google":
+        st.json(v)
+    elif k == "nmap":
+        st.json(v)
+    elif k == "google_analytic_id":
+        st.write(v)
+
+
+
 type = st.selectbox("Select data type",options=Methods)
 data = st.text_input("Enter you search query")
 
 
 if st.button("Search"):
         if type == "email":
-
-            output = asyncio.run(email_search.search(data))
-
-            st.dataframe(output["hits"])
-
-            for k,v in output.items():
-                st.write(k)
-                st.dataframe(v)
+            # Split email
             username,domain = splitEmail(data)
-            if domain != public_emails():
-                domain_data = asyncio.run(Domain().search(domain))
-                if domain_data != None:
-                    data["domain"] = domain_data
-            
-            #return render_template("gmail_results.html", hits=dict(google=data["gdata"], json_str=data["Jresults"],accounts=data["hits"]))
-    
+
+            # Lookup email
+            output = asyncio.run(email_search.search(data))
+            for k,v in output.items():
+                present_data(k,v)
+
+            # Lookup username
+            usernames = asyncio.run(username_search.search(username))
+            for k,v in output.items():
+                present_data(k,v)
+
+            ##TODO search domain of email if it not part of public email
         
         elif type == "username":
             output = asyncio.run(username_search.search(data))
-            st.dataframe(output)
+            for k,v in output.items():
+                present_data(k,v)
 
         elif type == "IP":
             output = asyncio.run(ip_search.search(data))
             for k,v in output.items():
-                st.write(k)
-                st.dataframe(v)
-            
+                present_data(k,v)
 
         elif type == "Domain":
 
             output = asyncio.run(domain_search.search(data))
-            subdomain = asyncio.run(Subdomain().search(data))
-            emails = asyncio.run(domain_search.find_emails(data))
             for k,v in output.items():
-                st.write(k)
-                if k == "shodan":
-                    try:
-                        for d in v:
-                            try:
-                                st.datframe(d)
-                            except:
-                                st.json(d)
-                                pass
-                    except:
-                        pass
-                else:
-                    try:
-                        st.dataframe(v)
-                    except Exception  as e:
-                        st.json(v)
-                        print(e)
-                        pass
-            st.write("Subdomains")
-            st.dataframe(subdomain)
-            st.write("Emails")
-            st.dataframe(emails)
+                present_data(k,v)
+                
+
