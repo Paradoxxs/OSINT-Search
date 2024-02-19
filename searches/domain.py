@@ -16,11 +16,14 @@ import socket
 
 class Domain():
 
-    async def domain_to_ip(self,domain):
+    async def domain_to_ip(self, domain):
         resolver = aiodns.DNSResolver()
         try:
             result = await resolver.query(domain, 'A')
-            return result[0].host
+            if result:
+                return result[0].host
+            else:
+                return None
         except aiodns.error.DNSError:
             return None
         
