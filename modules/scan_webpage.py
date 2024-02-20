@@ -29,10 +29,7 @@ class social:
                     url = match.group()
                     if not url.startswith("http"):
                         url = f"https://{url}"
-                    profile_name = match.groups()[0]
-                    SO_profile.append(
-                        {"platform": platform, "url": url, "profile_name": profile_name}
-                    )
+                    SO_profile.append(url)
             #check if SO_profile have at least 1 profile
             if len(SO_profile) > 0:
                 return SO_profile
