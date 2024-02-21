@@ -1,5 +1,5 @@
 import nmap3
-
+import json
 
 class nmap():
     
@@ -15,4 +15,7 @@ class PortScan():
     scan = nmap()
 
     async def query(self, ipAddress):
-        return await self.scan.query(ipAddress)  # Await the result
+        data =  await self.scan.query(ipAddress)  # Await the result
+        # convert to data to json
+        return json.dumps(data)
+        

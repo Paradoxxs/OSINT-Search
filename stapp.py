@@ -26,13 +26,11 @@ requests.utils.default_user_agent = lambda: USER_AGENT
 Methods = ["email","username","IP","Domain"]
 
 
-
+##TODO present data in 2-3 coloumns to save space.
 def present_data(k,v):
     st.write(k)
     if k == "subdomains":
-        for d in v:
-            st.write(d["domain"])
-            st.json(d,expanded=False)
+        st.dataframe(v)
     elif k == "shodan_ip":
         st.write(v)
     elif k == "usernames":
@@ -53,6 +51,10 @@ def present_data(k,v):
         st.json(v)
     elif k == "google_analytic_id":
         st.write(v)
+    elif k == "hist_dns":
+        st.json(v,expanded=False)
+    elif k == "wayback":
+        st.json(v,expanded=False)
 
 
 

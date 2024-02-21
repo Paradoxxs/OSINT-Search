@@ -24,13 +24,6 @@ class emailrep:
             return
 
 
-
-
-
-
-
-
-
 # path to the main folder of the project
 PROJECT_HOME = get_env_var("project_dir")
 
