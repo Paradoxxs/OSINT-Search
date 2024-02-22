@@ -91,6 +91,7 @@ class IPLookup:
         self.ipinfo = IPInfo()
 
     async def query(self, ipAddress):
+        ##TODO clean up the way data is returned, so that it consistence no matter what API is used.
         try:
             data = await self.ip2location.query(ipAddress)
         except Exception as e:
