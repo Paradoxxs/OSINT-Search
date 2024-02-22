@@ -78,7 +78,11 @@ if st.button("Search"):
                 present_data(k,v)
 
             ##TODO search domain of email if it not part of public email
-        
+            if not any(domain.split(".")[0] == email for email in public_emails):
+                domain_output = asyncio.run(domain_search.search(data))
+                for k,v in domain_output.items():
+                    present_data(k,v)
+
         elif type == "username":
             output = asyncio.run(username_search.search(data))
             for k,v in output.items():

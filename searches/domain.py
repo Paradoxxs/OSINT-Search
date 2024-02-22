@@ -12,7 +12,6 @@ from modules.port_scan import PortScan
 from modules.scan_webpage import ScanWebpage, Find_Google_analytic_id
 from modules.subdomain import Subdomain as module_subdomain
 import socket
-import json
 import aiodns
 
 class Domain:

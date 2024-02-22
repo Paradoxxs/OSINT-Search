@@ -19,7 +19,7 @@ def convert_datetime(obj):
     return obj
 
 def public_emails():
-    return ["gmail.com","hotmail.com","yahoo.com","aol.com","msn.com","live.com"]
+    return ["gmail","hotmail","yahoo","aol","msn","live"]
 
 def splitEmail(email):
     email_split = email.split("@")
