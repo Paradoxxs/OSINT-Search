@@ -1,4 +1,6 @@
-import requests
+import asyncio
+import aiohttp
+from jarm.scanner.scanner import Scanner
 
 class crt:
     meta = {"description": "Query crt.sh (certificate transparency) for subdomains"}
@@ -6,30 +8,33 @@ class crt:
     base_url = "https://crt.sh"
     reject_wildcards = False
 
-    async def setup(self):
-        self.cert_ids = set()
-        return await super().setup()
 
     async def request_url(self, domain):
-        url = f"{self.base_url}/?q={domain}&output=json"
-        return requests.get(url)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.base_url}/?q={domain}&output=json") as response:
+                return await response.json()
 
-    def parse_results(self, r, query):
-        j = r.json()
-        for cert_info in j:
-            if not type(cert_info) == dict:
+    def parse_results(self, data, query):
+        cert_ids = set()
+        for cert_info in data:
+            if not isinstance(cert_info, dict):
                 continue
             cert_id = cert_info.get("id")
             if cert_id:
-                if hash(cert_id) not in self.cert_ids:
-                    self.cert_ids.add(hash(cert_id))
+                if hash(cert_id) not in cert_ids:
+                    cert_ids.add(hash(cert_id))
                     domain = cert_info.get("name_value")
                     if domain:
                         for d in domain.splitlines():
                             yield d.lower()
 
-    async def query(self,domain):
-        response = self.request_url(domain)
-        if response.status_code is 200:
-            result = self.parse_results(response,domain)
-            return result
+    async def query(self, domain):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{self.base_url}/?q={domain}&output=json") as response:
+                return await response.json()
+
+class tlsjarm:
+
+    async def search(self, domain):
+        data = await Scanner.scan_async(domain, 443)
+        return data[0]

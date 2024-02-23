@@ -56,7 +56,10 @@ def present_data(k,v):
         st.json(v,expanded=False)
     elif k == "wayback":
         st.json(v,expanded=False)
-
+    elif k == "tls_certs":
+        st.dataframe(v)
+    elif k == "TLS_jarm":
+        st.write(v)
 
 
 type = st.selectbox("Select data type",options=Methods)
