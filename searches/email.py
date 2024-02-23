@@ -9,7 +9,6 @@ class Email():
     async def search(self,email):
 
         ##TODO implement email reputation lookup
-        ##TODO implement gravatar lookup
         data = await EmailLookup().search(email)
         return data 
 

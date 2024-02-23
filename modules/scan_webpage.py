@@ -30,9 +30,9 @@ class social:
                     if not url.startswith("http"):
                         url = f"https://{url}"
                     SO_profile.append(url)
-            #check if SO_profile have at least 1 profile
+            #check if SO_profile have at least 1 profile and remove dublicate
             if len(SO_profile) > 0:
-                return SO_profile
+                return list(set(SO_profile))
             else:
                 return None
         except Exception as e:

@@ -13,6 +13,7 @@ from modules.scan_webpage import ScanWebpage, Find_Google_analytic_id
 from modules.subdomain import Subdomain as module_subdomain
 import aiodns
 import aiohttp
+import socket
 
 class Domain:
 
@@ -28,13 +29,10 @@ class Domain:
 
     async def test_connection(self, domain, timeout=2):
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://{domain}") as response:
-                    response.raise_for_status()  # Raise an error for non-2xx status codes
-                    data = await response.text()
-                    print(f"Connected to {domain} successfully")
-                    return True, data
-        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            response = requests.get(f"https://{domain}", verify=True, timeout=timeout)
+            print(f"Connected to {domain} successfully")
+            return True, response
+        except (socket.error, asyncio.TimeoutError) as e:
             print(f"Failed to connect to {domain}: {e}")
             return False, None
 
