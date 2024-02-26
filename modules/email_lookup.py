@@ -4,7 +4,6 @@ from collections import namedtuple
 from holehe import core
 import os
 import sys
-import requests
 from utils.helpers import get_env_var
 from pprint import pprint
 from ghunt.apis.peoplepa import PeoplePaHttp
@@ -12,14 +11,15 @@ from ghunt.objects.base import GHuntCreds
 from emailrep import EmailRep
 import json
 
-class emailrep:
+class reputation_lookup:
 
-    emailrep = EmailRep(get_env_var("emailrep_api"))
+    emailrep_api = EmailRep(get_env_var("emailrep_api"))
     
-    async def query(self,email):
+    def query(self,email):
         # query an email address
         try:
-            return await self.emailrep.query(email)
+            data = self.emailrep_api.query(email)
+            return data
         except:
             return
 
@@ -134,7 +134,7 @@ class EmailLookup():
     def __init__(self):
         self.holehe = holehe()
         self.ghunt = ghunt()
-        self.mailrep = emailrep()
+        
 
 
     async def search(self,email):
@@ -159,7 +159,7 @@ class EmailLookup():
         # combine holehe and poastal hits
         registered = holehe_data + poastal_hits
         gdata = await ghunt().query(email)
-        mailrep = await self.mailrep.query(email)
+        mailrep = reputation_lookup().query(email)
         
        #check value is empty if not add to dict
         if gdata != None:

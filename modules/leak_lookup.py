@@ -1,8 +1,13 @@
 import requests 
 from utils.helpers import get_env_var
+import aiohttp
+import asyncio
+
+
 class breachdirectory:
     
     #https://rapidapi.com/rohan-patra/api/breachdirectory
+    #Free version hard limit 10/month
     base_url = "https://breachdirectory.p.rapidapi.com/"
     api_key = get_env_var("breachdirectory_api")
 
@@ -20,20 +25,23 @@ class breachdirectory:
 
 
 
-class leaklookup:
 
-    #https://leak-lookup.com/api
+
+class LeakLookup:
+    # https://leak-lookup.com/api
     api_key = get_env_var("leaklookup_api")
     base_url = "https://leak-lookup.com/api/search"
-    def query(self,email):
 
-        payload = { 'key': self.api_key,
-                    'type': 'email_address',
-                    'query': {email}
-                    }
+    async def search(self, email):
+        payload = {'key': self.api_key,
+                   'type': 'email_address',
+                   'query': {email}
+                   }
 
-        response = requests.post(self.base_url, data=payload)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.base_url, data=payload) as response:
+                data = await response.json()
+                return list(data['message'].keys())
 
-        return response.json()  # or any other desired processing of the response
 
 

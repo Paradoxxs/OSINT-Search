@@ -3,7 +3,7 @@ import requests
 from utils.helpers import get_env_var, convert_datetime, public_emails
 from modules.historical_dns import mnemonic
 from modules.webpage_archives import wayback
-from modules.shodan_search import shodan
+from modules.shodan_search import shodan_search
 from modules.get_infastructure import get_whois
 from modules.webpage_technology import wappalyzer
 from modules.ip_lookup import IPLookup
@@ -70,6 +70,8 @@ class Domain:
 
     async def search(self, domain):
         data = {}
+        ip = await self.domain_to_ip(domain)
+        shodan_ip = await shodan_search().IP_services(ip)
         WHOIS_data = get_whois(domain)
         TLS_jarm = await tlsjarm().search(domain)
         ssl_certs = await crt().query(domain)
@@ -89,6 +91,8 @@ class Domain:
             data["TLS_jarm"] = TLS_jarm
         if ssl_certs:
             data["tls_certs"] = ssl_certs
+        if shodan_ip:
+            data["shodan_ip"] = shodan_ip
         if emails:
             data["emails"] = emails
 
