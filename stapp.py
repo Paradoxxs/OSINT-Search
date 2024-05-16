@@ -31,7 +31,7 @@ def present_data(k, v):
     st.write(k)
     if k in ["subdomains", "usernames", "emails", "Email_registration", "tls_certs", "leak"]:
         st.dataframe(v)
-    elif k in ["shodan_ip", "ip_Whois", "google_analytic_id", "TLS_jarm"]:
+    elif k in ["shodan_ip", "ip_Whois", "google_analytic_id", "TLS_jarm","Google_analytic_shared"]:
         st.write(v)
     elif k in ["WHOIS", "hostIO", "google", "nmap", "hist_dns", "wayback", "Email_reputation"]:
         st.json(v, expanded=False)

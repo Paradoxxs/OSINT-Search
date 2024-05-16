@@ -5,7 +5,7 @@ from modules.historical_dns import mnemonic
 from modules.webpage_archives import wayback
 from modules.shodan_search import shodan_search
 from modules.get_infastructure import get_whois
-from modules.webpage_technology import wappalyzer
+from modules.webpage_technology import wappalyzer, spyonweb
 from modules.ip_lookup import IPLookup
 from modules.find_emails import FindEmail
 from modules.port_scan import PortScan
@@ -62,6 +62,10 @@ class Domain:
                 tech, social_data, Google_analytic_id = await self.webpage_analysis(res)
                 if Google_analytic_id:
                     data["Google_analytic_id"] = Google_analytic_id
+
+                    google_analytic_shared = spyonweb().query(Google_analytic_id)
+                    if google_analytic_shared:
+                        data["Google_analytic_shared"] = google_analytic_shared
                 if tech:
                     data["Technology"] = tech
                 if social_data:

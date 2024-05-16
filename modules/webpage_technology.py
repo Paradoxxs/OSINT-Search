@@ -1,6 +1,7 @@
 from Wappalyzer import Wappalyzer, WebPage
-
+from utils.helpers import get_env_var
 import warnings
+import requests
 
 warnings.filterwarnings(
     "ignore",
@@ -30,3 +31,26 @@ class wappalyzer:
         except Exception as e:
             print(e)
             return None
+
+class spyonweb:
+   
+    def __init__(self, access_token):
+        self.access_token = get_env_var("spyonweb_api")
+        self.base_url = "https://api.spyonweb.com/v1/analytics/"
+
+    def query(self, analytics_code):
+        url = f"{self.base_url}{analytics_code}?access_token={self.access_token}"
+        
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") == "found":
+                analytics_result = data.get("result", {}).get("analytics", {})
+                if analytics_result:
+                    items = analytics_result.get(analytics_code, {}).get("items")
+                    return items
+        else:
+            print(f"Error: {response.status_code}")
+            return None
+
+
