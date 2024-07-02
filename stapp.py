@@ -11,8 +11,8 @@ from searches.phone import Phone
 
 ##TODO present data in a nice way, e.g. 2-3 columns
 st.set_page_config(page_title="OSINT-search", page_icon=":dog:",layout="wide",initial_sidebar_state="expanded",menu_items={'About': "This is in WIP"})
-st.markdown("# Main page")
-st.write("Hello, OSINT!")
+st.markdown("# OSINT Search")
+st.write("Hello, OSINT practicer!")
 
 
 username_search = Username()
@@ -31,9 +31,9 @@ def present_data(k, v):
     st.write(k)
     if k in ["subdomains", "usernames", "emails", "Email_registration", "tls_certs", "leak"]:
         st.dataframe(v)
-    elif k in ["shodan_ip", "ip_Whois", "google_analytic_id", "TLS_jarm","Google_analytic_shared"]:
+    elif k in ["google_analytic_id", "TLS_jarm","Google_analytic_shared"]:
         st.write(v)
-    elif k in ["WHOIS", "hostIO", "google", "nmap", "hist_dns", "wayback", "Email_reputation"]:
+    elif k in ["WHOIS", "hostIO", "google", "nmap", "hist_dns", "wayback", "Email_reputation","shodan_ip","ip_Whois"]:
         st.json(v, expanded=False)
 
 
@@ -76,7 +76,7 @@ if st.button("Search"):
 
             # Lookup username
             usernames = asyncio.run(username_search.search(username))
-            for k,v in output.items():
+            for k,v in usernames.items():
                 search_output.append((k, v))
 
             # Lookup domain

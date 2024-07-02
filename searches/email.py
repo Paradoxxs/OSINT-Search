@@ -8,7 +8,6 @@ class Email():
     
     async def search(self,email):
 
-        ##TODO implement email reputation lookup
         data = await EmailLookup().search(email)
         leak_data = await LeakLookup().search(email)
 

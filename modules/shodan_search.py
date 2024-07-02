@@ -4,7 +4,7 @@ from utils.helpers import get_env_var
 import requests
 import codecs
 
-class shodan_search: 
+class shodan: 
     ##TODO what am I looking for ?
     api_key = get_env_var("shodan_key")
     shodan_api = Shodan(api_key)
