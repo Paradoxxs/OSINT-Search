@@ -10,3 +10,6 @@
 [submodule "Ghunt"]
 	path = Ghunt_github
 	url = https://github.com/mxrch/GHunt
+[submodule "Ghunt_github"]
+	path = Ghunt_github
+	url = https://github.com/mxrch/GHunt
