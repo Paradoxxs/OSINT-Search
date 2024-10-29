@@ -66,6 +66,14 @@ def present_data_in_columns(search_output, present_func):
 
 
 
+def create_node_edge(parent, point):
+    new_node = StreamlitFlowNode(str(uuid4()),(0,0),{"content": point}, 'default', 'right', 'left')
+    st.session_state.curr_state.nodes.append(new_node)
+    new_edge = StreamlitFlowEdge(f"{parent.id}-{new_node.id}", parent.id, new_node.id, animated=True)
+    st.session_state.curr_state.edges.append(new_edge)
+
+type = st.selectbox("Select data type",options=Methods)
+data = st.text_input("Enter you search query")
 
 def graphview(data,output):
 
@@ -75,6 +83,7 @@ def graphview(data,output):
         st.session_state.curr_state = StreamlitFlowState(nodes,edges)
 
     head_node = StreamlitFlowNode("1",(0,0),{"content": data}, 'default', 'right', 'left')    
+
     st.session_state.curr_state.nodes.append(head_node)
 
     
@@ -96,62 +105,62 @@ def graphview(data,output):
                     min_zoom=0.1)
     st.rerun()
 
-def create_node_edge(parent, point):
-    new_node = StreamlitFlowNode(str(uuid4()),(0,0),{"content": point}, 'default', 'right', 'left')
-    st.session_state.curr_state.nodes.append(new_node)
-    new_edge = StreamlitFlowEdge(f"{parent.id}-{new_node.id}", parent.id, new_node.id, animated=True)
-    st.session_state.curr_state.edges.append(new_edge)
+@st.cache_data
+def search(data,type):
+    if type == "email":
+        # Split email
+        username,domain = splitEmail(data)
 
-type = st.selectbox("Select data type",options=Methods)
-data = st.text_input("Enter you search query")
+        # Lookup email
+        output = asyncio.run(email_search.search(data))
+        for k,v in output.items():
+            search_output.append((k, v))
 
+        # Lookup username
+        usernames = asyncio.run(username_search.search(username))
+        for k,v in usernames.items():
+            search_output.append((k, v))
 
+        # Lookup domain
+        if not any(domain.split(".")[0] == email for email in public_emails()):
+            domain_output = asyncio.run(domain_search.search(domain))
+            for k,v in domain_output.items():
+                search_output.append((k, v))
 
+    elif type == "username":
+        output = asyncio.run(username_search.search(data))
+        for k,v in output.items():
+            search_output.append((k, v))
+
+    elif type == "IP":
+        output = asyncio.run(ip_search.search(data))
+        for k,v in output.items():
+            search_output.append((k, v))
+
+    elif type == "Domain":
+
+        output = asyncio.run(domain_search.search(data))
+        for k,v in output.items():
+            search_output.append((k, v))
+
+    elif type == "phone":
+        output = Phone.search(data)
+        if output:
+            st.write(output)
+
+    return search_output
 
 if st.button("Search"):
+        st.session_state.input = data
         search_output = []
+        output = search(data,type)
 
-        if type == "email":
-            # Split email
-            username,domain = splitEmail(data)
-
-            # Lookup email
-            output = asyncio.run(email_search.search(data))
-            for k,v in output.items():
-                search_output.append((k, v))
-
-            # Lookup username
-            usernames = asyncio.run(username_search.search(username))
-            for k,v in usernames.items():
-                search_output.append((k, v))
-
-            # Lookup domain
-            if not any(domain.split(".")[0] == email for email in public_emails()):
-                domain_output = asyncio.run(domain_search.search(domain))
-                for k,v in domain_output.items():
-                    search_output.append((k, v))
-
-        elif type == "username":
-            output = asyncio.run(username_search.search(data))
-            for k,v in output.items():
-                search_output.append((k, v))
-
-        elif type == "IP":
-            output = asyncio.run(ip_search.search(data))
-            for k,v in output.items():
-                search_output.append((k, v))
-
-        elif type == "Domain":
-
-            output = asyncio.run(domain_search.search(data))
-            for k,v in output.items():
-                search_output.append((k, v))
-
-        elif type == "phone":
-            output = Phone.search(data)
-            if output:
-                st.write(output)
-
+        st.session_state.output = output
         #graphview(data, search_output)
 
-        present_data_in_columns(search_output, present_data)
+if 'output' not in st.session_state:
+    st.write("please search")
+    st.write(st.session_state.output)
+
+if 'output' in st.session_state:
+    present_data_in_columns(st.session_state.output, present_data)
