@@ -8,6 +8,12 @@ from searches.email import Email
 from searches.domain import Domain
 from utils.helpers import splitEmail,public_emails
 from searches.phone import Phone
+from streamlit_flow import streamlit_flow
+from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
+from streamlit_flow.state import StreamlitFlowState
+from streamlit_flow.layouts import TreeLayout
+
+from uuid import uuid4
 
 ##TODO present data in a nice way, e.g. 2-3 columns
 st.set_page_config(page_title="OSINT-search", page_icon=":dog:",layout="wide",initial_sidebar_state="expanded",menu_items={'About': "This is in WIP"})
@@ -62,6 +68,45 @@ type = st.selectbox("Select data type",options=Methods)
 data = st.text_input("Enter you search query")
 
 
+def graphview(data,output):
+
+    if 'curr_state' not in st.session_state:
+        nodes = []
+        edges = []
+        st.session_state.curr_state = StreamlitFlowState(nodes,edges)
+
+    head_node = StreamlitFlowNode("1",(0,0),{"content": data}, 'default', 'right', 'left')    
+    st.session_state.curr_state.nodes.append(head_node)
+
+
+    
+    #st.session_state.curr_state.nodes.append(head_node)
+    st.rerun()
+    for k, v in output:
+        create_node_edge(head_node,v)
+
+    st.session_state.curr_state = streamlit_flow('flow', 
+                    st.session_state.curr_state, 
+                    layout=TreeLayout(direction='right'), 
+                    fit_view=True, 
+                    height=500, 
+                    enable_node_menu=True,
+                    enable_edge_menu=True,
+                    enable_pane_menu=True,
+                    show_minimap=True, 
+                    hide_watermark=True, 
+                    allow_new_edges=True,
+                    min_zoom=0.1)
+
+
+def create_node_edge(parent, point):
+    new_node = StreamlitFlowNode(str(uuid4()),(0,0),{"content": point}, 'default', 'right', 'left')
+    st.session_state.curr_state.nodes.append(new_node)
+    new_edge = StreamlitFlowEdge(f"{parent.id}-{new_node.id}", parent.id, new_node.id, animated=True)
+    st.session_state.curr_state.edges.append(new_edge)
+    st.rerun()
+
+
 if st.button("Search"):
         search_output = []
 
@@ -105,5 +150,13 @@ if st.button("Search"):
             output = Phone.search(data)
             if output:
                 st.write(output)
-                
+
+        graphview(data, search_output)
+ 
         present_data_in_columns(search_output, present_data)
+
+
+
+
+
+
