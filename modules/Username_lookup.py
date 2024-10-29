@@ -5,33 +5,8 @@ from utils.helpers import QueryResponse
 import requests
 from utils.helpers import get_env_var
 import dataclasses
+from sherlock_project import sherlock
 
-
-
-# path to the main folder of the project
-PROJECT_HOME = get_env_var("project_dir")
-SHERLOCK_PATHS = ["sherlock_github/sherlock"]
-PROJECT_PATHS =  SHERLOCK_PATHS
-
-# remove sherlock  main.py that messes up imports
-try:
-    os.remove(os.path.join(PROJECT_HOME, "__main__.py"))
-except:
-    pass
-
-# add different projects to sys.path
-# this is required for the different projects to run without modification
-for p in PROJECT_PATHS:
-    try:
-        sys.path.append(os.path.join(PROJECT_HOME, p))
-    except Exception as e:
-        print(e)
-        pass
-try:
-    from sherlock_github.sherlock import sherlock
-except Exception as e:
-    print(e)
-    pass
 
 def get_sherlock(username):
     # results will go here

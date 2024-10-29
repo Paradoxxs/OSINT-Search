@@ -1,15 +1,9 @@
-[submodule "poastal"]
-	path = poastal_github
-	url = https://github.com/jakecreps/poastal.git
-[submodule "holehe"]
-	path = holehe_github
-	url = https://github.com/megadose/holehe.git
-[submodule "sherlock"]
-	path = sherlock_github
-	url = https://github.com/sherlock-project/sherlock.git
-[submodule "Ghunt"]
-	path = Ghunt_github
-	url = https://github.com/mxrch/GHunt
 [submodule "Ghunt_github"]
 	path = Ghunt_github
 	url = https://github.com/mxrch/GHunt
+[submodule "holehe_github"]
+	path = holehe_github
+	url = https://github.com/megadose/holehe
+[submodule "poastal_github"]
+	path = poastal_github
+	url = https://github.com/jakecreps/poastal
