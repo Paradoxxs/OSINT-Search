@@ -1,12 +1,12 @@
-[submodule "poastal_github"]
+[submodule "poastal"]
 	path = poastal_github
 	url = https://github.com/jakecreps/poastal.git
-[submodule "holehe_github"]
+[submodule "holehe"]
 	path = holehe_github
 	url = https://github.com/megadose/holehe.git
-[submodule "sherlock_github"]
+[submodule "sherlock"]
 	path = sherlock_github
 	url = https://github.com/sherlock-project/sherlock.git
-[submodule "Ghunt_github"]
+[submodule "Ghunt"]
 	path = Ghunt_github
 	url = https://github.com/mxrch/GHunt
