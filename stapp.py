@@ -66,6 +66,7 @@ def present_data_in_columns(search_output, present_func):
 
 
 
+
 @st.cache_data
 def search(data,type):
     search_output = []
@@ -111,6 +112,12 @@ def search(data,type):
             st.write(output)
 
     return search_output
+
+
+
+type = st.selectbox("Select data type",options=Methods)
+data = st.text_input("Enter you search query")
+
 
 if st.button("Search"):
         output = search(data,type)
