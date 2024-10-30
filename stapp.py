@@ -66,47 +66,9 @@ def present_data_in_columns(search_output, present_func):
 
 
 
-def create_node_edge(parent, point):
-    new_node = StreamlitFlowNode(str(uuid4()),(0,0),{"content": point}, 'default', 'right', 'left')
-    st.session_state.curr_state.nodes.append(new_node)
-    new_edge = StreamlitFlowEdge(f"{parent.id}-{new_node.id}", parent.id, new_node.id, animated=True)
-    st.session_state.curr_state.edges.append(new_edge)
-
-type = st.selectbox("Select data type",options=Methods)
-data = st.text_input("Enter you search query")
-
-def graphview(data,output):
-
-    if 'curr_state' not in st.session_state:
-        nodes = []
-        edges = []
-        st.session_state.curr_state = StreamlitFlowState(nodes,edges)
-
-    head_node = StreamlitFlowNode("1",(0,0),{"content": data}, 'default', 'right', 'left')    
-
-    st.session_state.curr_state.nodes.append(head_node)
-
-    
-    for k, v in output:
-        create_node_edge(head_node,v)
-
-    
-    st.session_state.curr_state = streamlit_flow('flow', 
-                    st.session_state.curr_state, 
-                    layout=TreeLayout(direction='right'), 
-                    fit_view=True, 
-                    height=500, 
-                    enable_node_menu=True,
-                    enable_edge_menu=True,
-                    enable_pane_menu=True,
-                    show_minimap=True, 
-                    hide_watermark=True, 
-                    allow_new_edges=True,
-                    min_zoom=0.1)
-    st.rerun()
-
 @st.cache_data
 def search(data,type):
+    search_output = []
     if type == "email":
         # Split email
         username,domain = splitEmail(data)
@@ -151,16 +113,8 @@ def search(data,type):
     return search_output
 
 if st.button("Search"):
-        st.session_state.input = data
-        search_output = []
         output = search(data,type)
 
-        st.session_state.output = output
-        #graphview(data, search_output)
+        present_data_in_columns(output, present_data)
 
-if 'output' not in st.session_state:
-    st.write("please search")
-    st.write(st.session_state.output)
-
-if 'output' in st.session_state:
-    present_data_in_columns(st.session_state.output, present_data)
+   
